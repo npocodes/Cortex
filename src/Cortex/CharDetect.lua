@@ -306,6 +306,7 @@ local function CompileTargetFilter(self: CharDetect)
 end
 
 
+
 --{ PUBLIC }--
 
 --Creates new instance

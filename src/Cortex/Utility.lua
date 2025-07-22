@@ -36,6 +36,15 @@ Tool.MARKER_DIR_NAME = "_MARKERS_"
 Tool.MARKER_DIR = nil --Created during first runs
 
 
+export type FrameRayResult = {
+	HitPart: BasePart,
+	Material: Enum.Material,
+	Position: Vector3,
+	Normal: Vector3,
+	Distance: number,
+}
+
+
 --{ PUBLIC FUNCTIONS }--
 
 --Returns the folder/directory associated with the name provided

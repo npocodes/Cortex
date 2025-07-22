@@ -112,7 +112,7 @@ function AnimMod.Run(char: Model)
 		},
 	}
 
-	-- Existance in this list signifies that it is an emote, the value indicates if it is a looping emote
+	-- Existence in this list signifies that it is an emote, the value indicates if it is a looping emote
 	local emoteNames = { wave = false, point = false, dance = true, dance2 = true, dance3 = true, laugh = false, cheer = false}
 
 	math.randomseed(tick())

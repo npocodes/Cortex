@@ -1,6 +1,6 @@
 local RepStor = game:GetService("ReplicatedStorage")
 local PlayerServ = game:GetService("Players")
-local Cortex = require(RepStor.Cortex.Cortex)
+local Cortex = require(RepStor.Cortex)
 
 local CLIENT = PlayerServ.LocalPlayer
 

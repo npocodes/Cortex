@@ -1,0 +1,41 @@
+{
+  "name": "Cortex",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+
+	    "SharedData": {
+		  "$path": "src/sharedData"
+	    },
+
+      "Cortex": {
+        "$path": "src/Cortex"
+      }
+
+    },
+
+    "ServerScriptService": {
+      "ServerExample": {
+        "$path": "src/server"
+      },
+      "PatchNotes": {
+        "$path": "src/PatchNotes"
+      }
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "ClientExample": {
+          "$path": "src/client"
+        }
+      }
+    },
+
+    "Workspace": {
+      "$properties": {
+        "FilteringEnabled": true
+      }
+    }
+  }
+}

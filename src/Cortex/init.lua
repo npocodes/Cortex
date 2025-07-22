@@ -113,19 +113,21 @@ local MOVE_MODE = {
 }
 
 
-local CORTEX_DIR = RepStor:WaitForChild("Cortex")
+--local CORTEX_DIR = RepStor:WaitForChild("Cortex")
 
 --NPC Character Billboard Tags (HP, STATUS, ETC..)
-local NPC_TAGS = CORTEX_DIR:WaitForChild("NPCTags")
+local NPC_TAGS = script.Parent:WaitForChild("NPCTags")
 local CHAR_TAG = NPC_TAGS:WaitForChild("_CharTag")
 
-local STATUS_TAG = NPC_TAGS:WaitForChild("_StatusTag")
-local STATUS_TAG_FRAME_TPL
+local CHAT_TAG = NPC_TAGS:WaitForChild("_ChatTag")
+local CHAT_TAG_FRAME_TPL
+
 
 local INDICATOR_TAG = NPC_TAGS:WaitForChild("_IndicatorTag")
 local INDICATOR_TAG_IMG_TPL
 
-local ANIM_SCRIPT = if(RunServ:IsClient())then CORTEX_DIR.AnimClient else CORTEX_DIR.AnimServ
+local ANIM_SCRIPT = if(RunServ:IsClient())then script.AnimClient else script.AnimServ
+local ANIM_EMOTE_ASSETS = script.Parent:WaitForChild("AnimEmoteData"):Clone()
 
 local STUCK_TIMEOUT = 16
 local DEFAULT_TRACKING_UPDATE = 5 --Update path every 5 secs
@@ -182,7 +184,7 @@ local function SortPlayers()
 		
 		player.CharacterAdded:Once(function(char)
 			--AUTOMATICALLY RUN SELF ON CLIENT
-			local clientScript = CORTEX_DIR:FindFirstChild("CortexClient"):Clone()
+			local clientScript = script:FindFirstChild("CortexClient"):Clone()
 			clientScript.Parent = char
 			char.Parent = Tool.CHAR_DIR
 			--The script will then move itself to playerscripts
@@ -598,7 +600,7 @@ local function SetProperties(new, ap)
 	new.PatrolsCompleted = 0
 
 	-- STATE FLAGS
-	new.ShowStatusDisplay = false
+	--new.ShowStatusDisplay = false
 	new.ShowPathway = false
 	new.DoJump = false
 	new.Jumped = false
@@ -686,10 +688,10 @@ local function NewClientCortex(NPC: Model, ap: AgentParams, animScript: (LocalSc
 		animScript = require(animScript)
 		task.spawn(function() animScript.Run(new.NPC) end)
 		
-		new.StatusGui = STATUS_TAG:Clone()
-		new.StatusGui.Parent = new.NPC
-		new.StatusGui.Adornee = new.NPC.PrimaryPart
-		new.StatusGui.Enabled = true
+		new.BubbleChatGui = CHAT_TAG:Clone()
+		new.BubbleChatGui.Parent = new.NPC
+		new.BubbleChatGui.Adornee = new.NPC.PrimaryPart
+		new.BubbleChatGui.Enabled = true
 
 		new.IndicatorGui = INDICATOR_TAG:Clone()
 		new.IndicatorGui.Parent = new.NPC
@@ -697,7 +699,7 @@ local function NewClientCortex(NPC: Model, ap: AgentParams, animScript: (LocalSc
 		new.IndicatorGui.Enabled = true
 	else
 		print("Creating Server Spawned NPC instance.")
-		new.StatusGui = new.NPC:WaitForChild(STATUS_TAG.Name)
+		new.BubbleChatGui = new.NPC:WaitForChild(CHAT_TAG.Name)
 		new.IndicatorGui = new.NPC:WaitForChild(INDICATOR_TAG.Name)
 	end
 	
@@ -718,9 +720,9 @@ end
 --Initializes Cortex Class
 function Cortex.Initialize()
 	print("Loading: Cortex")
-	
-	Tool = require(CORTEX_DIR.Utility)
-	CharDetect = require(CORTEX_DIR.CharDetect)
+
+	Tool = require(script.Utility)
+	CharDetect = require(script.CharDetect)
 end
 
 --Runs/Loads the Cortex Class
@@ -760,14 +762,17 @@ function Cortex.Run()
 			end
 		end
 		ANIM_SCRIPT.Name = "Animate"
+		for i, asset in ANIM_EMOTE_ASSETS:GetChildren() do
+			local newAsset = asset:Clone()
+			newAsset.Parent = ANIM_SCRIPT
+		end
 		
 		--Get the NPC Character Tags
 		CHAR_TAG = CHAR_TAG:Clone()
 		
-		
-		STATUS_TAG = STATUS_TAG:Clone()
-		STATUS_TAG_FRAME_TPL = STATUS_TAG:WaitForChild("_FrameTpl"):Clone()
-		STATUS_TAG._FrameTpl:Destroy()
+		CHAT_TAG = CHAT_TAG:Clone()
+		CHAT_TAG_FRAME_TPL = CHAT_TAG:WaitForChild("_FrameTpl"):Clone()
+		CHAT_TAG._FrameTpl:Destroy()
 		
 		INDICATOR_TAG = INDICATOR_TAG:Clone()
 		INDICATOR_TAG_IMG_TPL = INDICATOR_TAG:WaitForChild("_ImageTpl"):Clone()
@@ -791,7 +796,7 @@ end
 --Creates a new Cortex instance for the provided NPC Model
 function Cortex.New(NPC: Model, ap: AgentParams, animScript: any?): Cortex
 	if(RunServ:IsClient())then return NewClientCortex(NPC, ap, animScript) end
-	
+
 	if(not(NPC) or not(NPC:IsA("Model")))then
 		warn("Unable to create new Cortex: Missing NPC Model.")
 		--return new
@@ -809,25 +814,26 @@ function Cortex.New(NPC: Model, ap: AgentParams, animScript: any?): Cortex
 	new.NPC = NPC --The Model Instance
 	new.NPC:SetAttribute("CortexNPC", true)--Mark this NPC as a cortex NPC spawned from server so client can pick it up
 	new.NPC:SetAttribute("Owner", 0) --Preset to zero so client can see when its changed
+
 	new.Humanoid = NPC:WaitForChild("Humanoid")
 	new.Humanoid:SetAttribute("DefaultSpeed", new.Humanoid.WalkSpeed)
 	new.Humanoid:SetAttribute("DefaultJumpPower", new.Humanoid.JumpPower)
 	new.RigType = new.Humanoid.RigType --Enum.HumanoidRigType
-	
+
 	new.LifeTime = nil --Lifetime/lifespan of this NPC in seconds
 
     --Set the model collision group to default NPC group.
     Tool.SetModelCollisionGroup(NPC, Tool.NPC_GROUP_NAME)
-	
+
 	--Use custom anim script if provided, else use default
-	local animScript = animScript or ANIM_SCRIPT:Clone()
+	animScript = animScript or ANIM_SCRIPT:Clone()
 	animScript.Parent = new.NPC
-	
-	
-	new.StatusGui = STATUS_TAG:Clone()
-	new.StatusGui.Parent = new.NPC
-	new.StatusGui.Adornee = new.NPC.PrimaryPart
-	new.StatusGui.Enabled = true
+
+	new.BubbleChatGui = CHAT_TAG:Clone()
+	new.BubbleChatGui.Parent = new.NPC
+
+	new.BubbleChatGui.Adornee = new.NPC.PrimaryPart
+	new.BubbleChatGui.Enabled = true
 
 	new.IndicatorGui = INDICATOR_TAG:Clone()
 	new.IndicatorGui.Parent = new.NPC
@@ -836,7 +842,7 @@ function Cortex.New(NPC: Model, ap: AgentParams, animScript: any?): Cortex
 
 	SetProperties(new, ap)--Same Between Server/Client
 	Connect(new)
-	
+
 	--Cache the new Instance
 	OBJ_LIST[new.NPC] = new
 	
@@ -856,7 +862,7 @@ end
 
 
 --Returns a Cortex waypoint obj used for path tracing.
-function Cortex.GetWaypoingObj(): Part
+function Cortex.GetWaypointObj(): Part
 	return WAYPOINT_OBJ:Clone()
 end
 
@@ -960,13 +966,13 @@ function Cortex.TravelPath(self: Cortex, waypoints:{PathWaypoint})
 	self.Stopped = false
 	self.Traveling = true
 	self.MakingTravelPlans = false
-	self:SetStatus("Traveling", 3)
+	self:SetStatus("Traveling")
 end
 
 --Pauses traveling the path to the current dest
 function Cortex.PauseTravel(self: Cortex)
 	repeat task.wait() until not(self.MakingTravelPlans)
-	self:SetStatus("Pausing", 3)
+	self:SetStatus("Pausing")
 	self.Traveling = false
 	self.Humanoid:MoveTo(self.Humanoid.Parent:GetPivot().Position) --Stop
 end
@@ -975,8 +981,8 @@ end
 function Cortex.ResumeTravel(self: Cortex)
 	if(self.WatchPoint)then
 		--If there isn't a WatchPoint then there was no travel.
-		self:SetStatus("Traveling", 3)
-		self.WatchPoint.StartTime = tick() 
+		self:SetStatus("Traveling")
+		self.WatchPoint.StartTime = tick()
 		self.Traveling = true
 	else
 		self:StopTravel()
@@ -990,7 +996,7 @@ function Cortex.StopTravel(self: Cortex, msg: string, finishMove: boolean)
 	self.Traveling = false
 	self:ClearWaypoints()
 	msg = if(msg)then "Stopping Travel -"..msg else "Stopping Travel"
-	self:SetStatus(msg, 3)
+	self:SetStatus(msg)
 	
 	self.Stopped = true
 	print("Waiting for Instruction")
@@ -1081,8 +1087,7 @@ end
 --Set the table of patrol points to use for patrol routes
 function Cortex.SetPatrolPoints(self: Cortex, patrolPoints: {Point})
 	if(not(self or patrolPoints))then return end
-	
-	
+
 	for i, point in patrolPoints do
 		self.PatrolPoints[i] = Tool.PointPosition(point)
 	end
@@ -1485,7 +1490,7 @@ end
 function Cortex.FindPathway(self: Cortex, dest: Point, startPoint: Point): {PathWaypoint}?
 	
 	print("Finding Pathway")
-	if(not(dest))then self:SetStatus("No Dest..") return end
+	if(not(dest))then self:SetStatus("No Dest") return end
 	dest = Tool.PointPosition(dest)
 	startPoint = if(startPoint) then Tool.PointPosition(startPoint) else self.NPC:GetPivot().Position
 
@@ -1506,7 +1511,7 @@ function Cortex.FindPathway(self: Cortex, dest: Point, startPoint: Point): {Path
 		return self.Path:GetWaypoints()
 	else
 		print("No Pathway Found!")
-		self:SetStatus(self.Path.Status.Name, 3)
+		self:SetStatus(self.Path.Status.Name)
 		self._NoPathFoundEvent:Fire(self.Path.Status.Name, startPoint, dest)
 	end
 end
@@ -1707,36 +1712,51 @@ function Cortex.Stun(self: Cortex, release: boolean)
 	end
 end
 
---Creates a new status message for the NPC to display.  
---Basically like a chat bubble for NPCs
-function Cortex.SetStatus(self: Cortex, status: string, lifetime: number?)
+--Sets the status attribute on the NPC
+function Cortex.SetStatus(self: Cortex, status: string)
 	if(not(status))then return end
 	print("Setting Status:", status)
-	if((self.ShowStatusDisplay or lifetime) and self.StatusGui)then
-		self.StatusGui.Enabled = true
-		local newFrame = STATUS_TAG_FRAME_TPL:Clone()
-		local zindex = self.StatusGui:GetChildren()
-		for i, statusMsg in zindex do
-			statusMsg.ZIndex += 1
-		end
-		--self.StatusGui:ClearAllChildren()
+	self.NPC:SetAttribute("Status", status)
+end
 
-		newFrame.ZIndex = 0
-		newFrame.Parent = self.StatusGui
+--Displays a chat bubble above the NPC with the provided msg.  
+--The msg lasts for the lifetime in secs provided.
+function Cortex.BubbleChat(self: Cortex, msg: string, lifetime: number?)
+	if(not(msg))then return end
+	if(not(self.BubbleChatGui))then warn("No BubbleChat Gui Set") return end
 
-		newFrame.Visible = true
-		local label = newFrame:FindFirstChild("_TextLbl", true)
-		if(label)then label.Text = status end
-		if(lifetime)then
-			task.delay(lifetime+#zindex, function()
-				if(not(self.StatusGui))then return end
-				if(not(newFrame))then return end
-				if(not(self.ShowStatusDisplay))then self.StatusGui.Enabled = false end
-				newFrame.Visible = false
-				newFrame:Destroy()
-			end)
-		end
+	self.BubbleChatGui.Enabled = true
+	local newFrame = CHAT_TAG_FRAME_TPL:Clone()
+	local zindex = self.BubbleChatGui:GetChildren()
+	for i, chatMsg in zindex do
+		chatMsg.ZIndex += 1
 	end
+	--self.BubbleChatGui:ClearAllChildren()
+
+	newFrame.ZIndex = 0
+	newFrame.Parent = self.BubbleChatGui
+
+	newFrame.Visible = true
+	local label = newFrame:FindFirstChild("_TextLbl", true)
+	if(label)then label.Text = msg end
+	if(lifetime)then
+		task.delay(lifetime+#zindex, function()
+			if(not(self.BubbleChatGui))then return end
+			if(not(newFrame))then return end
+			if(not(self.ShowStatusDisplay))then self.BubbleChatGui.Enabled = false end
+			newFrame.Visible = false
+			newFrame:Destroy()
+		end)
+	end
+end
+
+--Activates the emote animation specified by name.  
+--If it exists (not yet implemented)
+function Cortex.Emote(self: Cortex, emoteName)
+	--LETS MAKE THIS PLAY THE EMOTE ANIMATION DIRECTLY
+	--INSTEAD OF USING humnaoid:PlayEmote()
+		
+	--self.NPC.Humanoid:PlayEmote(emoteName)
 end
 
 --Tweens a pt label in a random direction upward from the NPC to indicate hits
@@ -1826,7 +1846,7 @@ function Cortex.Destroy(self: Cortex)
 
 	self.LifeTime = nil
 
-	self.StatusGui = nil
+	self.BubbleChatGui = nil
 	self.IndicatorGui = nil
 
 	self.PointDist = nil
