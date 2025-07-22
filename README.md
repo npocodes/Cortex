@@ -2,8 +2,8 @@
 
 Cortex is a framework for handling Roblox NPC characters. It provides basic functionality common to most all NPCs. Using the framework allows you to rapidly add functional NPCs to your game with common movement supported by pathfinding. Common target detection capabilities that are supported by events. Movement and detection capabilities can be combined with one another to accomplish many common tasks. Further combine with your own unique NPC methods to create highly sophisticated NPCs for any game.
 
-***
 
+---
 ### FUNCTIONS
 
 #### New(NPC: Model, ap: AgentParams, animScript: any)
@@ -18,7 +18,7 @@ Cortex is a framework for handling Roblox NPC characters. It provides basic func
 - Returns a copy of the default waypoint object for path tracing
 
 
-
+---
 ### METHODS
 
 #### Disable()
@@ -49,7 +49,7 @@ Cortex is a framework for handling Roblox NPC characters. It provides basic func
 - Relocates NPC within the game in a safe manner unless unsafe is set true. If lookAt is provided, the NPC will be faced in the lookAt direction. (Safe manner means that checks will be performed for blockages and landing surface.)
 
 
-
+---
 ### TRAVEL MODE
 
 #### TravelTo(dest: Point, finalDest: boolean)
@@ -72,7 +72,7 @@ Cortex is a framework for handling Roblox NPC characters. It provides basic func
 - Cancels traveling to the currently set dest. Cannot be resumed.
 
 
-
+---
 ### PATROL MODE
 
 #### Patrol(route: {})
@@ -99,7 +99,7 @@ Cortex is a framework for handling Roblox NPC characters. It provides basic func
 - Sets the patrol route to use when Patrolling. If no route provided then a random route is created using the set patrol points (if any).
 
 
-
+---
 ### TRACKING MODE - Requires Character Detection
 
 #### Track(target: Model | BasePart)
@@ -110,7 +110,7 @@ Cortex is a framework for handling Roblox NPC characters. It provides basic func
 - Cancels tracking the currently set tracking target.
 
 
-
+---
 ### CHASE MODE - Requires Character Detection
 
 #### Chase(target: Model | BasePart)
@@ -121,7 +121,7 @@ Cortex is a framework for handling Roblox NPC characters. It provides basic func
 - Cancels chasing the currently set target.
 
 
-
+---
 ### FOLLOW MODE - Requires Character Detection
 
 #### Follow(target: Model | BasePart)
@@ -132,14 +132,14 @@ Cortex is a framework for handling Roblox NPC characters. It provides basic func
 - Cancels following the currently set target.
 
 
-
+---
 ## CHARACTER DETECTION
 
 #### New(NPC: Model, range: NumberRange, focusRange: NumberRange, gracePeriod: NumberRange)
 - Creates a new character detection instance for the NPC specified.
 
 
-
+---
 ### Detection Methods
 
 #### ShowRange(opts: "All | Detect | Focus")
@@ -162,7 +162,7 @@ Cortex is a framework for handling Roblox NPC characters. It provides basic func
 - Sets the grace periods (in secs) for focused detection events. (Min = CloseFocus Grace, Max = FocusLost Grace)
 
 
-
+---
 ### Targeting Methods
 
 #### AddCharTarget(char: Model)
