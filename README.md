@@ -4,7 +4,7 @@ Cortex is a framework for handling Roblox NPC characters. It provides basic func
 
 
 ---
-### FUNCTIONS
+## FUNCTIONS
 
 #### New(NPC: Model, ap: AgentParams, animScript: any)
 - Creates a new Cortex instance for the provided NPC Model
@@ -19,7 +19,7 @@ Cortex is a framework for handling Roblox NPC characters. It provides basic func
 
 
 ---
-### METHODS
+## METHODS
 
 #### Disable()
 - Disables the NPC Cortex instance
@@ -181,7 +181,7 @@ Cortex is a framework for handling Roblox NPC characters. It provides basic func
 - Removes the specified target as a detectable target for the NPC. (Use for non-character targets)
 
 
-
+---
 ### Targeting Events
 
 #### TargetDetected
@@ -193,7 +193,7 @@ Cortex is a framework for handling Roblox NPC characters. It provides basic func
 
 
 #### TargetFocusLost
-- Fires when target is leaves max focus range and max grace time has expired. (Escaped)
+- Fires when target leaves max focus range and max grace time has expired. (Escaped)
 
 
 #### TargetFocusGain
